@@ -10,7 +10,7 @@ type Env = {
 const app = new Hono<{ Bindings: Env }>();
 
 app.use('/*', cors({
-  origin: '*',
+  origin: 'https://scope-web.pages.dev',
   allowMethods: ['GET', 'POST', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
 }));
