@@ -11,13 +11,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MODELS, useChatStore } from "@/lib/store";
-import { ArrowUpIcon, ChevronDownIcon } from "lucide-react";
+import { ArrowUpIcon, ChevronDownIcon, SparklesIcon } from "lucide-react";
 
 interface InputAreaProps {
   input: string;
   setInput: (input: string) => void;
   handleSubmit: () => void;
   isLoading: boolean;
+  onAnalyze: () => void;
+  isAnalyzing: boolean;
 }
 
 export const InputArea = ({
@@ -25,6 +27,8 @@ export const InputArea = ({
   setInput,
   handleSubmit,
   isLoading,
+  onAnalyze,
+  isAnalyzing,
 }: InputAreaProps) => {
   const { model, setModel } = useChatStore();
   const currentModel = MODELS.find((m) => m.id === model);
@@ -48,6 +52,14 @@ export const InputArea = ({
         className="min-h-[2.5rem] max-h-[10rem]"
       />
       <InputGroupAddon align="block-end">
+        <InputGroupButton
+          className="text-xs"
+          onClick={onAnalyze}
+          disabled={isAnalyzing}
+        >
+          <SparklesIcon className="size-3" />
+          {isAnalyzing ? "Analyzing..." : "Analyze"}
+        </InputGroupButton>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <InputGroupButton className="text-xs">
