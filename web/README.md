@@ -4,6 +4,6 @@ Follow the instructions [here](https://developers.cloudflare.com/pages/get-start
 
 ```
 pn wrangler login
-npx wrangler pages project create
-npx wrangler pages deploy <BUILD_OUTPUT_DIRECTORY>
+pn wrangler pages project create
+pn wrangler pages deploy <BUILD_OUTPUT_DIRECTORY>
 ```
