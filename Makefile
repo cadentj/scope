@@ -1,4 +1,4 @@
-.PHONY: web workers
+.PHONY: web workers backend
 
 web:
 	./scripts/web.sh
@@ -6,3 +6,5 @@ web:
 workers:
 	./scripts/workers.sh
 
+backend: 
+	source .venv/bin/activate && uvicorn backend.main:app --reload

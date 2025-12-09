@@ -36,3 +36,5 @@ drizzle/
 
 # Cloudflare
 .wrangler
+
+.venv/
