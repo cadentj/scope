@@ -1,9 +1,6 @@
 name = "scope-workers"
 main = "src/index.ts"
-compatibility_date = "2024-01-01"
-
-[env.development]
-vars = { ENVIRONMENT = "development" }
+compatibility_date = "2025-12-01"
 
 [observability]
 enabled = false
@@ -11,11 +8,9 @@ head_sampling_rate = 1
 
 [observability.logs]
 enabled = true
-head_sampling_rate = 1
-persist = true
-invocation_logs = true
+head_sampling_rate = 1 # Capture all logs
+persist = true # Store logs persistently so you can view them later in the dashboard
+invocation_logs = true # Log metadata about each req invocation
 
 [observability.traces]
 enabled = false
-persist = true
-head_sampling_rate = 1

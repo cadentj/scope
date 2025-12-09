@@ -1,25 +1,52 @@
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useState } from 'react';
+import { ChevronDownIcon, ArrowUpIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useChatStore, MODELS } from '@/lib/store';
+
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from '@/components/ui/input-group';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8787').replace(/\/$/, '');
 
 export function Chat() {
   const [input, setInput] = useState('');
+  const { messages: storedMessages, setMessages: setStoredMessages, model, setModel } = useChatStore();
   const { messages, sendMessage, status } = useChat({
+    messages: storedMessages,
     transport: new DefaultChatTransport({
       api: `${API_URL}/api/chat`,
     }),
+    onFinish: ({ messages }) => {
+      setStoredMessages(messages);
+    },
   });
 
   const isLoading = status === 'streaming' || status === 'submitted';
+  const currentModel = MODELS.find((m) => m.id === model);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
     if (input.trim() && !isLoading) {
-      sendMessage({ text: input });
+      sendMessage({ text: input }, { body: { model } });
       setInput('');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit();
     }
   };
 
@@ -63,22 +90,45 @@ export function Chat() {
           </div>
         )}
       </div>
-      <form onSubmit={handleSubmit} className="flex gap-2 p-4 border-t border-border bg-card">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-          disabled={isLoading}
-          className="flex-1 px-4 py-2 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        />
-        <button
-          type="submit"
-          disabled={isLoading || !input.trim()}
-          className="px-6 py-2 bg-primary text-primary-foreground rounded-md font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity whitespace-nowrap"
-        >
-          Send
-        </button>
-      </form>
+      <div className="p-4 border-t border-border bg-card">
+        <InputGroup>
+          <InputGroupTextarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Type your message..."
+            disabled={isLoading}
+            rows={1}
+            className="min-h-[2.5rem] max-h-[10rem]"
+          />
+          <InputGroupAddon align="block-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <InputGroupButton className="text-xs">
+                  {currentModel?.label} <ChevronDownIcon className="size-3" />
+                </InputGroupButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="top" align="start">
+                {MODELS.map((m) => (
+                  <DropdownMenuItem key={m.id} onSelect={() => setModel(m.id)}>
+                    {m.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <InputGroupButton
+              variant="default"
+              size="icon-xs"
+              className="ml-auto rounded-full"
+              disabled={isLoading || !input.trim()}
+              onClick={handleSubmit}
+            >
+              <ArrowUpIcon />
+              <span className="sr-only">Send</span>
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
+      </div>
     </div>
   );
 }

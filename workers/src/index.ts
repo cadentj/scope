@@ -5,18 +5,24 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 
 type Env = {
   OPENROUTER_API_KEY: string;
+  ENVIRONMENT: string;
 };
 
 const app = new Hono<{ Bindings: Env }>();
 
 app.use('/*', cors({
-  origin: 'https://scope-web.pages.dev',
+  origin: (origin, c) => {
+    if (c.env.ENVIRONMENT === 'development') {
+      return origin ?? '*';
+    }
+    return 'https://scope-web.pages.dev';
+  },
   allowMethods: ['GET', 'POST', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
 }));
 
 app.post('/api/chat', async (c) => {
-  const { messages } = await c.req.json();
+  const { messages, model } = await c.req.json();
 
   if (!messages || !Array.isArray(messages)) {
     return c.json({ error: 'Messages array is required' }, 400);
@@ -27,7 +33,7 @@ app.post('/api/chat', async (c) => {
   });
 
   const result = streamText({
-    model: openrouter.chat('openai/gpt-4o-mini'),
+    model: openrouter.chat(model || 'google/gemma-3-12b-it'),
     messages: convertToModelMessages(messages),
   });
 
